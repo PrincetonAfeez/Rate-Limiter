@@ -1,5 +1,8 @@
 # Development, test, and type-check dependencies.
 #
+# Installs the package in editable mode plus pytest, mypy, pytest-cov, and PyYAML.
+# Equivalent to: pip install -e ".[all]"
+#
 #   pip install -r requirements-dev.txt
 #
 -r requirements.txt

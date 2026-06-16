@@ -1,7 +1,6 @@
-# Runtime dependencies for capstone-rate-limiter.
+# Runtime install for capstone-rate-limiter (import name: ratelimiter).
 #
-# The library intentionally has no required third-party packages at runtime.
-# Install the package itself in editable mode:
+# The library has no required third-party runtime dependencies.
 #
 #   pip install -r requirements.txt
 #

@@ -1,5 +1,9 @@
 # Optional YAML config support (PyYAML).
-# Without this extra, the built-in minimal YAML parser is used instead.
+#
+# Without PyYAML, load_config() uses a minimal built-in YAML parser for the
+# documented config subset. With PyYAML installed, full YAML files are supported.
+#
+# Equivalent to: pip install -e ".[yaml]"
 #
 #   pip install -r requirements-yaml.txt
 #
