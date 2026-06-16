@@ -10,11 +10,23 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Rate Limiter Capstone" }]
+keywords = ["rate-limiting", "token-bucket", "concurrency", "cli", "capstone"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
 dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "mypy>=1.8", "pytest-cov>=4"]
 yaml = ["PyYAML>=6"]
+all = ["pytest>=8", "mypy>=1.8", "pytest-cov>=4", "PyYAML>=6"]
 
 [project.scripts]
 ratelimit = "ratelimiter.cli.main:main"
@@ -32,6 +44,13 @@ ratelimiter = ["py.typed"]
 testpaths = ["tests"]
 pythonpath = ["src", "tests"]
 addopts = "-ra"
+filterwarnings = [
+    "ignore:'ratelimiter.cli.main' found in sys.modules:RuntimeWarning",
+]
+
+markers = [
+    "timing_dependent: tests that rely on thread scheduling or race windows",
+]
 
 [tool.mypy]
 python_version = "3.11"
@@ -43,8 +62,10 @@ warn_redundant_casts = true
 
 [tool.coverage.run]
 source = ["ratelimiter"]
-omit = ["*/teaching/*"]
+branch = false
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 95
 show_missing = true
+precision = 1
+skip_empty = true
