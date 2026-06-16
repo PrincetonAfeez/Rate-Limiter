@@ -1,15 +1,44 @@
+# Bytecode and caches
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Packaging / build
+*.egg
 *.egg-info/
+build/
+dist/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Test, type-check, and lint caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
+.tox/
+.nox/
+
+# Coverage reports
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
-build/
-dist/
-.venv/
-venv/
+
+# Logs and local env files
+*.log
+.env
+.env.*
+
+# Editor / assistant tooling
+.claude/
+.cursor/
 
 # Project scope documents (local planning)
 rate_limiter_scope.txt
