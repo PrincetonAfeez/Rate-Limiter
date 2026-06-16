@@ -1,0 +1,8 @@
+# Optional YAML config support (PyYAML).
+# Without this extra, the built-in minimal YAML parser is used instead.
+#
+#   pip install -r requirements-yaml.txt
+#
+-r requirements.txt
+
+PyYAML>=6
