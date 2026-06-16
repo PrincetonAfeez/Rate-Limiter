@@ -10,14 +10,26 @@ dashboard in the core build.
 ## Quickstart
 
 ```powershell
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[all]"
+# or: pip install -r requirements-dev.txt
 ratelimit demo all
 ratelimit simulate --algorithm token --keys 100 --requests 10000 --threads 8
+ratelimit simulate --algorithm token --cost 2 --limit 10 --requests 100
 ratelimit simulate --algorithm token --hot-key --requests 5000 --threads 16
-ratelimit benchmark --algorithms token,fixed,sliding,leaky --keys 1000 --threads 16
+ratelimit benchmark --algorithms token,fixed,sliding,leaky --keys 1000 --threads 16 --cost 1
 pytest --cov=ratelimiter
 mypy src
 ```
+
+Install options:
+
+| Command | What you get |
+|---------|----------------|
+| `pip install -e .` | Library + `ratelimit` CLI only (zero runtime deps) |
+| `pip install -e ".[dev]"` | + pytest, mypy, pytest-cov |
+| `pip install -e ".[yaml]"` | + PyYAML for full YAML config parsing |
+| `pip install -e ".[all]"` | Dev tools and PyYAML together |
+| `pip install -r requirements-dev.txt` | Same as `.[all]` via requirements files |
 
 Without installing, the same commands can be run as:
 
@@ -25,6 +37,9 @@ Without installing, the same commands can be run as:
 $env:PYTHONPATH = "src"
 python -m ratelimiter.cli.main demo all
 ```
+
+The installable package name is `capstone-rate-limiter` (see `pyproject.toml`);
+import it in Python as `ratelimiter`.
 
 ## Public API
 
@@ -34,8 +49,10 @@ Every algorithm implements:
 try_acquire(key: str, cost: int | float = 1) -> Decision
 ```
 
-Key library exports also include `LimitRule`, `load_config`, `MetricsCollector`,
-`SweeperWorker`, and the `InspectableLimiter` protocol for CLI-style inspection.
+Key library exports also include `LimitRule`, `load_config`, `ConfigError`,
+`build_limiter`, `build_limiter_from_rule`, `require_inspectable`, `rule_from_config`,
+`MetricsCollector`, `SweeperWorker`, `LeakyBucketDrainWorker`, and the
+`InspectableLimiter` protocol for CLI-style inspection.
 
 `Decision` includes `allowed`, `remaining`, `retry_after`, `reset_after`,
 `limit`, `algorithm`, and `reason`. Denied decisions explain why the request
@@ -52,6 +69,26 @@ was rejected and never return negative timing values.
   autonomous drain worker.
 
 See [docs/algorithms.md](docs/algorithms.md) for tradeoffs.
+
+## Deterministic Time (`FakeClock`)
+
+All time-based logic uses monotonic time via the injectable `Clock` protocol.
+Tests and demos inject `FakeClock` so refill, window roll-over, TTL expiry, and
+scheduler behavior are deterministic without real sleeps:
+
+```python
+from ratelimiter import FakeClock, TokenBucketLimiter
+
+clock = FakeClock()
+limiter = TokenBucketLimiter(capacity=3, refill_rate=1, clock=clock)
+limiter.try_acquire("user")
+clock.advance(1.0)
+limiter.try_acquire("user")  # tokens refilled predictably
+```
+
+Background worker thread loops still wait on the host clock; tests drive
+`MonotonicScheduler.run_pending()` directly when they need fake-time scheduling.
+See [docs/workers.md](docs/workers.md).
 
 ## Concurrency
 
@@ -71,6 +108,27 @@ ratelimit demo concurrency-unsafe
 
 See [docs/concurrency.md](docs/concurrency.md) and
 [docs/failure_demos.md](docs/failure_demos.md).
+
+## Testing
+
+The suite has **220+ tests** with **~99% line coverage** on `ratelimiter` (95%
+minimum enforced in CI via `pyproject.toml`). Most tests use `FakeClock` for
+deterministic time-based behavior.
+
+A small number of concurrency race demos are marked
+`@pytest.mark.timing_dependent` because they rely on thread scheduling and
+intentional delays in the unsafe teaching implementations:
+
+```powershell
+pytest                              # full local suite (222 tests)
+pytest --cov=ratelimiter            # with coverage report (95% gate)
+pytest -m "not timing_dependent"    # CI-safe subset (220 tests)
+pytest -m timing_dependent          # race demos only (2 tests)
+mypy src                            # strict type check
+```
+
+GitHub Actions runs the CI-safe subset plus mypy on Python 3.11 and 3.12, and
+runs timing-dependent tests in a separate job on Python 3.12.
 
 ## Storage And Lifecycle
 
@@ -101,9 +159,23 @@ rule = "10/sec burst 20 algorithm token"
 
 ```powershell
 ratelimit simulate --config configs/sample_limits.toml --name api --requests 1000
+ratelimit simulate --config configs/sample_limits.json --name login --requests 100
 ratelimit inspect user-123 --config configs/sample_limits.toml --name login
 ratelimit reset user-123 --config configs/sample_limits.toml --name login
+ratelimit list --config configs/sample_limits.yaml
 ```
+
+Sample configs are provided in TOML, YAML, and JSON under `configs/`.
+
+### Process-local CLI state
+
+Each CLI command builds its own in-memory limiter instance. Keys created by
+`simulate` do not persist into a later `inspect`, `reset`, or `list` invocation.
+`ratelimit list` therefore reports configured rules but returns an empty
+`active_keys` list unless you use the library API or run traffic and inspection
+in the same Python process. `ratelimit simulate` includes an `active_keys` field
+for keys touched during that run. This is intentional for the capstone backend; a
+shared store (e.g. Redis) is a stretch goal.
 
 ### Rule grammar
 
@@ -141,6 +213,8 @@ expired and evicted key counts, worker lifecycle events, worker errors, and
 memory estimates.
 
 Denied decisions are logged at WARNING level; allowed decisions at INFO.
+Benchmark runs emit a structured `benchmark.summary` log event with per-algorithm
+throughput, allow/deny counts, memory estimates, and the `--cost` value used.
 
 Structured logs are emitted as JSON strings through Python's standard logging
 module.

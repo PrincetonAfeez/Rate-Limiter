@@ -1,5 +1,78 @@
 # Changelog
 
+## 0.1.7 - 2026-06-16
+
+Optional polish pass: docs sync, CLI test coverage, CI stability, packaging note.
+
+### Added
+- CLI integration tests: `inspect --config`, `simulate` with JSON config,
+  `list` with YAML config.
+- Unit tests for snapshot helpers, `failure_demo` error path, and
+  `concurrency.unsafe` re-exports.
+- README note: package installs as `capstone-rate-limiter`, imports as
+  `ratelimiter`.
+
+### Changed
+- `docs/cli.md`: documents `benchmark --cost`, testing marker, and clarified
+  `list` vs `simulate` `active_keys` behavior.
+- CI skips `@pytest.mark.timing_dependent` tests to avoid scheduler flake on
+  shared runners; run the full suite locally with plain `pytest`.
+
+## 0.1.6 - 2026-06-16
+
+Round 3 audit remediation: typing cleanup, CLI parity, teaching alignment, and docs.
+
+### Added
+- `benchmark --cost` flag (matches `simulate --cost`).
+- `LeakyBucketDrainWorker` exported from package root.
+- CLI integration test for `failure-demo race`.
+- README **Testing** subsection documenting `@pytest.mark.timing_dependent`.
+- Unsafe teaching limiters deny oversized `cost` with production-style reasons
+  (`cost exceeds limit` / `cost exceeds capacity`, `retry_after=None`).
+
+### Fixed
+- `StateFactory` / `StateMutation` aliases wired through storage with mypy-safe
+  casts in `InMemoryStorage.mutate` (0.1.5 changelog overstated full wiring).
+- Removed dead `lines_from_mapping()` and unused factory re-exports from CLI
+  `common.py`.
+- `demo concurrency-unsafe` uses `over_admission_summary()` from
+  `teaching.race_explainer`.
+- `demo` imports `LeakyBucketDrainWorker`, `SweeperWorker`, and
+  `LeakyBucketLimiter` from the public `ratelimiter` package.
+
+### Changed
+- `docs/SCOPE.md` clarifies that `list` alone does not show cross-command keys;
+  use `simulate` `active_keys` instead.
+
+## 0.1.5 - 2026-06-16
+
+Scope-alignment polish and portfolio cleanup.
+
+### Added
+- `ratelimiter.factory` module (`build_limiter`, `build_limiter_from_rule`, etc.)
+  as the public construction API; CLI commands import from it.
+- `configs/sample_limits.json` sample config.
+- `simulate --cost` flag and `active_keys` in simulate output.
+- `benchmark.summary` structured log event (see 0.1.4 alignment pass).
+- README `FakeClock` section and process-local CLI documentation.
+- Tests: all-algorithm cost validation, sliding multi-window jump, `demo all` /
+  `demo ttl-sweeper` smoke tests, unsafe teaching cost validation.
+- `@pytest.mark.timing_dependent` for unsafe race demos.
+- Exported `ConfigError`, `build_limiter`, and factory helpers from package root.
+
+### Fixed
+- `UnsafeFixedWindowLimiter` now validates cost via shared `_validate_cost`.
+- `StorageBackend` protocol documents `StateFactory` / `StateMutation` from
+  `concurrency.atomic` (concrete storage wiring completed in 0.1.6).
+
+### Removed
+- Unused `core/types.py` and dead `compact_decision()` CLI helper.
+
+### Changed
+- Demo commands construct safe limiters through `factory` instead of direct imports.
+- Inspect metrics use `compact_mapping` for rounded float output.
+- `.claude/` added to `.gitignore`.
+
 ## 0.1.4 - 2026-06-16
 
 Full audit remediation: validation hardening, CLI parity, teaching demos, CI, and
