@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "capstone-rate-limiter"
+dynamic = ["version"]
+description = "A CLI-first Python rate limiting capstone with concurrency, storage, workers, metrics, and deterministic tests."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Rate Limiter Capstone" }]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "mypy>=1.8"]
+yaml = ["PyYAML>=6"]
+
+[project.scripts]
+ratelimit = "ratelimiter.cli.main:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "ratelimiter.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ratelimiter = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+addopts = "-ra"
+
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+packages = ["ratelimiter"]
+strict = true
+warn_unused_ignores = true
+warn_redundant_casts = true
