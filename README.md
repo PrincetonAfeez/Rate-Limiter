@@ -10,11 +10,12 @@ dashboard in the core build.
 ## Quickstart
 
 ```powershell
-python -m pip install -e .
+python -m pip install -e ".[dev]"
 ratelimit demo all
 ratelimit simulate --algorithm token --keys 100 --requests 10000 --threads 8
-ratelimit benchmark --algorithms token,fixed-window,sliding-window-counter,leaky --keys 1000 --threads 16
-pytest
+ratelimit simulate --algorithm token --hot-key --requests 5000 --threads 16
+ratelimit benchmark --algorithms token,fixed,sliding,leaky --keys 1000 --threads 16
+pytest --cov=ratelimiter
 mypy src
 ```
 
@@ -32,6 +33,9 @@ Every algorithm implements:
 ```python
 try_acquire(key: str, cost: int | float = 1) -> Decision
 ```
+
+Key library exports also include `LimitRule`, `load_config`, `MetricsCollector`,
+`SweeperWorker`, and the `InspectableLimiter` protocol for CLI-style inspection.
 
 `Decision` includes `allowed`, `remaining`, `retry_after`, `reset_after`,
 `limit`, `algorithm`, and `reason`. Denied decisions explain why the request
@@ -98,6 +102,7 @@ rule = "10/sec burst 20 algorithm token"
 ```powershell
 ratelimit simulate --config configs/sample_limits.toml --name api --requests 1000
 ratelimit inspect user-123 --config configs/sample_limits.toml --name login
+ratelimit reset user-123 --config configs/sample_limits.toml --name login
 ```
 
 ### Rule grammar
@@ -111,8 +116,9 @@ A rule string has the form:
 - **limit** — a positive number (e.g. `100`, `2.5`).
 - **unit** — one of `s`/`sec`/`second`/`seconds`, `m`/`min`/`minute`/`minutes`,
   `h`/`hr`/`hour`/`hours`.
-- **burst** *(optional)* — token-bucket / leaky-bucket capacity; defaults to
-  `limit` when omitted.
+- **burst** *(optional)* — token-bucket / leaky-bucket capacity only; using
+  `burst` with fixed-window or sliding-window rules is a config error. Defaults
+  to `limit` when omitted for supported algorithms.
 - **algorithm** *(optional, default `token`)* — one of `token` (`token-bucket`),
   `fixed`/`fixed-window`, `sliding`/`sliding-counter`/`sliding-window-counter`,
   or `leaky`/`leaky-bucket`.
@@ -127,11 +133,14 @@ otherwise, so the core library has no required runtime dependencies.
 ## Observability
 
 The library records per-key allowed/denied counts, denial rate, current usage
-(tokens spent, window count, or queue depth), last decision time, and denial
-reason. Per-key metrics are pruned when a key is expired, evicted, or reset, so
-`total_keys` tracks currently active keys. Global metrics include allowed/denied
-totals, active keys, expired and evicted key counts, worker lifecycle events,
-worker errors, and memory estimates.
+(tokens spent, window count, or queue depth), last decision time, denial
+reason, and the most recent `retry_after` / `reset_after` hints. Per-key metrics
+are pruned when a key is expired, evicted, or reset, so `total_keys` tracks
+currently active keys. Global metrics include allowed/denied totals, active keys,
+expired and evicted key counts, worker lifecycle events, worker errors, and
+memory estimates.
+
+Denied decisions are logged at WARNING level; allowed decisions at INFO.
 
 Structured logs are emitted as JSON strings through Python's standard logging
 module.
