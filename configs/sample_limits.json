@@ -1,0 +1,16 @@
+{
+  "limiters": {
+    "api": {
+      "rule": "10/sec burst 20 algorithm token"
+    },
+    "login": {
+      "rule": "50/min algorithm sliding-window-counter"
+    },
+    "downloads": {
+      "rule": "100/hour algorithm fixed-window"
+    },
+    "queue": {
+      "rule": "20/sec burst 40 algorithm leaky"
+    }
+  }
+}

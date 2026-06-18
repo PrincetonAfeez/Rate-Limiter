@@ -1,0 +1,12 @@
+[limiters.api]
+rule = "10/sec burst 20 algorithm token"
+
+[limiters.login]
+rule = "50/min algorithm sliding-window-counter"
+
+[limiters.downloads]
+rule = "100/hour algorithm fixed-window"
+
+[limiters.queue]
+rule = "20/sec burst 40 algorithm leaky"
+
