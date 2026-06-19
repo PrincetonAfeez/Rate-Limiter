@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ratelimiter/decision.schema.json",
+  "title": "Rate Limiter Decision",
+  "description": "Schema for Decision.to_dict() output returned by limiter try_acquire calls.",
+  "type": "object",
+  "required": ["allowed", "remaining", "retry_after", "reset_after", "limit", "algorithm", "reason"],
+  "properties": {
+    "allowed": { "type": "boolean" },
+    "remaining": { "type": "number", "minimum": 0 },
+    "retry_after": { "type": ["number", "null"], "minimum": 0 },
+    "reset_after": { "type": ["number", "null"], "minimum": 0 },
+    "limit": { "type": "number", "exclusiveMinimum": 0 },
+    "algorithm": {
+      "type": "string",
+      "enum": ["token", "fixed-window", "sliding-window-counter", "leaky"]
+    },
+    "reason": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

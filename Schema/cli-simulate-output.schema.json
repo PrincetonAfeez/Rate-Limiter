@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ratelimiter/cli-simulate-output.schema.json",
+  "title": "CLI Simulate Output",
+  "description": "Schema for JSON printed by: ratelimit simulate ...",
+  "type": "object",
+  "required": [
+    "allowed",
+    "denied",
+    "requests",
+    "threads",
+    "keys",
+    "cost",
+    "elapsed_seconds",
+    "throughput_per_second",
+    "metrics",
+    "approximate_memory_bytes",
+    "active_keys",
+    "hot_key"
+  ],
+  "properties": {
+    "allowed": { "type": "integer", "minimum": 0 },
+    "denied": { "type": "integer", "minimum": 0 },
+    "requests": { "type": "integer", "minimum": 0 },
+    "threads": { "type": "integer", "minimum": 1 },
+    "keys": { "type": "integer", "minimum": 1 },
+    "cost": { "type": "number", "exclusiveMinimum": 0 },
+    "elapsed_seconds": { "type": "number", "minimum": 0 },
+    "throughput_per_second": { "type": "number", "minimum": 0 },
+    "metrics": { "$ref": "metrics.schema.json#/$defs/globalMetrics" },
+    "approximate_memory_bytes": { "type": "integer", "minimum": 0 },
+    "active_keys": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "hot_key": { "type": "boolean" }
+  },
+  "additionalProperties": false
+}

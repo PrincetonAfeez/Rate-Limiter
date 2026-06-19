@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ratelimiter/cli-inspect-output.schema.json",
+  "title": "CLI Inspect Output",
+  "description": "Schema for JSON printed by: ratelimit inspect <key> ...",
+  "type": "object",
+  "required": ["algorithm", "key", "active", "state", "metrics", "last_retry_after", "last_reset_after"],
+  "properties": {
+    "algorithm": {
+      "type": "string",
+      "enum": ["token", "fixed-window", "sliding-window-counter", "leaky"]
+    },
+    "key": { "type": "string", "minLength": 1 },
+    "active": { "type": "boolean" },
+    "state": {
+      "description": "Algorithm-specific storage state, or null when the key is inactive.",
+      "type": ["object", "null"],
+      "additionalProperties": true
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "last_retry_after": { "type": ["number", "null"], "minimum": 0 },
+    "last_reset_after": { "type": ["number", "null"], "minimum": 0 }
+  },
+  "additionalProperties": false
+}

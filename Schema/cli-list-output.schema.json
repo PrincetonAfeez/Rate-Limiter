@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ratelimiter/cli-list-output.schema.json",
+  "title": "CLI List Output",
+  "description": "Schema for JSON printed by: ratelimit list ...",
+  "type": "object",
+  "required": ["configured_limiters", "active_keys", "active_keys_note"],
+  "properties": {
+    "configured_limiters": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["algorithm", "limit", "period_seconds", "burst"],
+        "properties": {
+          "algorithm": {
+            "type": "string",
+            "enum": ["token", "fixed-window", "sliding-window-counter", "leaky"]
+          },
+          "limit": { "type": "number", "exclusiveMinimum": 0 },
+          "period_seconds": { "type": "number", "exclusiveMinimum": 0 },
+          "burst": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "active_keys": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "active_keys_note": { "type": "string" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ratelimiter/metrics.schema.json",
+  "title": "Rate Limiter Metrics Snapshot",
+  "description": "Schema for MetricsCollector.snapshot() output.",
+  "type": "object",
+  "required": ["global", "keys"],
+  "properties": {
+    "global": { "$ref": "#/$defs/globalMetrics" },
+    "keys": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/keyMetrics" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "globalMetrics": {
+      "type": "object",
+      "required": [
+        "total_allowed",
+        "total_denied",
+        "evicted_keys",
+        "expired_keys",
+        "worker_starts",
+        "worker_stops",
+        "worker_errors",
+        "approximate_memory_bytes",
+        "total_keys"
+      ],
+      "properties": {
+        "total_allowed": { "type": "integer", "minimum": 0 },
+        "total_denied": { "type": "integer", "minimum": 0 },
+        "evicted_keys": { "type": "integer", "minimum": 0 },
+        "expired_keys": { "type": "integer", "minimum": 0 },
+        "worker_starts": { "type": "integer", "minimum": 0 },
+        "worker_stops": { "type": "integer", "minimum": 0 },
+        "worker_errors": { "type": "integer", "minimum": 0 },
+        "approximate_memory_bytes": { "type": "integer", "minimum": 0 },
+        "total_keys": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "keyMetrics": {
+      "type": "object",
+      "required": [
+        "allowed_count",
+        "denied_count",
+        "current_usage",
+        "queue_depth",
+        "last_decision_time",
+        "last_denial_reason",
+        "last_retry_after",
+        "last_reset_after",
+        "denial_rate"
+      ],
+      "properties": {
+        "allowed_count": { "type": "integer", "minimum": 0 },
+        "denied_count": { "type": "integer", "minimum": 0 },
+        "current_usage": { "type": "number", "minimum": 0 },
+        "queue_depth": { "type": ["number", "null"], "minimum": 0 },
+        "last_decision_time": { "type": ["number", "null"], "minimum": 0 },
+        "last_denial_reason": { "type": ["string", "null"] },
+        "last_retry_after": { "type": ["number", "null"], "minimum": 0 },
+        "last_reset_after": { "type": ["number", "null"], "minimum": 0 },
+        "denial_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

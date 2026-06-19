@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ratelimiter/cli-reset-output.schema.json",
+  "title": "CLI Reset Output",
+  "description": "Schema for JSON printed by: ratelimit reset <key> ...",
+  "type": "object",
+  "required": ["key", "reset", "active_keys"],
+  "properties": {
+    "key": { "type": "string", "minLength": 1 },
+    "reset": { "type": "boolean" },
+    "active_keys": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

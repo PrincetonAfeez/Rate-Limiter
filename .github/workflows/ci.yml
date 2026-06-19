@@ -21,14 +21,12 @@ jobs:
           cache: pip
           cache-dependency-path: |
             pyproject.toml
-            requirements.txt
-            requirements-dev.txt
-            requirements-yaml.txt
+            requirements-dev.lock.txt
 
       - name: Install package and dev tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev,yaml]"
+          python -m pip install -r requirements-dev.lock.txt
 
       - name: Run tests with coverage (CI-safe)
         run: pytest -m "not timing_dependent" --cov=ratelimiter --cov-report=term-missing
@@ -48,13 +46,12 @@ jobs:
           cache: pip
           cache-dependency-path: |
             pyproject.toml
-            requirements.txt
-            requirements-dev.txt
+            requirements-dev.lock.txt
 
       - name: Install package and dev tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]"
+          python -m pip install -r requirements-dev.lock.txt
 
       - name: Run timing-dependent tests
         run: pytest -m timing_dependent

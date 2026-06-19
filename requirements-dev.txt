@@ -3,6 +3,12 @@
 # Installs the package in editable mode plus pytest, mypy, pytest-cov, and PyYAML.
 # Equivalent to: pip install -e ".[all]"
 #
+# Prefer the pinned lockfile for reproducible installs:
+#   pip install -r requirements-dev.lock.txt
+#
+# Regenerate the lockfile after changing optional dependencies:
+#   pip-compile requirements-dev.in -o requirements-dev.lock.txt
+#
 #   pip install -r requirements-dev.txt
 #
 -r requirements.txt

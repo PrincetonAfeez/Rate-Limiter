@@ -1,0 +1,6 @@
+# Locked dev/test dependencies. Regenerate with:
+#   pip-compile requirements-dev.in -o requirements-dev.lock.txt
+#
+# Reproducible install:
+#   pip install -r requirements-dev.lock.txt
+-e .[all]

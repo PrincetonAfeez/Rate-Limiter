@@ -10,7 +10,8 @@ dashboard in the core build.
 ## Quickstart
 
 ```powershell
-python -m pip install -e ".[all]"
+python -m pip install -r requirements-dev.lock.txt
+# or: pip install -e ".[all]"
 # or: pip install -r requirements-dev.txt
 ratelimit demo all
 ratelimit simulate --algorithm token --keys 100 --requests 10000 --threads 8
@@ -30,6 +31,14 @@ Install options:
 | `pip install -e ".[yaml]"` | + PyYAML for full YAML config parsing |
 | `pip install -e ".[all]"` | Dev tools and PyYAML together |
 | `pip install -r requirements-dev.txt` | Same as `.[all]` via requirements files |
+| `pip install -r requirements-dev.lock.txt` | Same as `.[all]`, with pinned transitive versions |
+
+Regenerate the lockfile after changing dev dependencies in `pyproject.toml`:
+
+```powershell
+pip install pip-tools
+pip-compile requirements-dev.in -o requirements-dev.lock.txt
+```
 
 Without installing, the same commands can be run as:
 
@@ -226,3 +235,16 @@ rate-limiting service. The in-memory backend is process-local. Benchmarks are
 for comparison and exploration, not correctness proof. Redis, asyncio, Django
 middleware, and a dashboard are stretch integrations after the core system is
 complete.
+
+## Security posture
+
+This project is a CLI-first educational rate-limiting library. It protects only
+the in-process limiter state from unsafe concurrent mutation. It does not
+provide authentication, authorization, encryption, network isolation, distributed
+quota enforcement, Redis-backed coordination, API gateway protection, abuse
+detection, or tenant isolation.
+
+The default storage backend is process-local memory. It should not be treated as
+a security boundary for production systems. Unsafe implementations under
+`ratelimiter.teaching` are intentionally vulnerable race-condition demos and are
+not part of the normal public API.

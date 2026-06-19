@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/ratelimiter/config.schema.json",
+  "title": "Rate Limiter Config",
+  "description": "Schema for rate limiter config files using either a top-level limiters or rules mapping.",
+  "type": "object",
+  "oneOf": [
+    { "required": ["limiters"] },
+    { "required": ["rules"] }
+  ],
+  "properties": {
+    "limiters": { "$ref": "#/$defs/limiterMap" },
+    "rules": { "$ref": "#/$defs/limiterMap" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "limiterMap": {
+      "type": "object",
+      "description": "Named limiter definitions keyed by limiter name.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "oneOf": [
+          { "$ref": "#/$defs/ruleString" },
+          {
+            "type": "object",
+            "required": ["rule"],
+            "properties": {
+              "rule": { "$ref": "#/$defs/ruleString" }
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
+    "ruleString": {
+      "type": "string",
+      "description": "Format: <limit>/<unit> [burst <n>] [algorithm <name>]",
+      "pattern": "^\\s*\\d+(?:\\.\\d+)?\\s*/\\s*(?:s|sec|second|seconds|m|min|minute|minutes|h|hr|hour|hours)(?:\\s+burst\\s+\\d+(?:\\.\\d+)?)?(?:\\s+algorithm\\s+(?:token|token-bucket|fixed|fixed-window|sliding|sliding-counter|sliding-window-counter|leaky|leaky-bucket))?\\s*$",
+      "examples": [
+        "100/min",
+        "10/sec burst 20 algorithm token",
+        "100/hour algorithm fixed-window",
+        "50/min algorithm sliding-window-counter"
+      ]
+    }
+  }
+}
